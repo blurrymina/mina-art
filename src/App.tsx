@@ -25,38 +25,38 @@ const App: React.FC = () => {
   }, []);
 
   return (
-      <I18nextProvider i18n={i18n}>
-        <Router>
-          <Routes>
-            {/* Home Page (with Header and Footer) */}
-            <Route
-              path="/"
-              element={
-                <>
-                  <Header />
-                  <Hero />
-                  <Gallery />
-                  <PaintingGame />
-                  <About />
-                  <Footer />
-                </>
-              }
-            />
+    <I18nextProvider i18n={i18n}>
+      <Router>
+        <Routes>
+          {/* Home Page (with Header and Footer) */}
+          <Route
+            path="/"
+            element={
+              <>
+                <Header />
+                <Hero />
+                <Gallery />
+                <PaintingGame />
+                <About />
+                <Footer />
+              </>
+            }
+          />
 
-            {/* Admin Panel Route (Protected, without Header and Footer) */}
-            <Route
-              path="/admin"
-              element={isAuthenticated ? <AdminPanel /> : <Navigate to="/login" />}
-            />
+          {/* Admin Panel Route (Protected, without Header and Footer) */}
+          <Route
+            path="/admin"
+            element={isAuthenticated ? <AdminPanel /> : <Navigate to="/login" />}
+          />
 
-            {/* Login Route */}
-            <Route path="/login" element={<AdminLogin />} />
+          {/* Login Route */}
+          <Route path="/login" element={<AdminLogin />} />
 
-            {/* Redirect any unknown routes to Login */}
-            <Route path="*" element={<Navigate to="/login" />} />
-          </Routes>
-        </Router>
-      </I18nextProvider>
+          {/* Redirect any unknown routes to Home */}
+          <Route path="*" element={<Navigate to="/" />} />
+        </Routes>
+      </Router>
+    </I18nextProvider>
   );
 };
 
