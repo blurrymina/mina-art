@@ -26,7 +26,7 @@ const App: React.FC = () => {
 
   return (
     <I18nextProvider i18n={i18n}>
-      <Router basename="/mina-art">
+      <Router basename="/mina-art"> {/* Ensure proper basename for GitHub Pages */}
         <Routes>
           {/* Home Page (with Header and Footer) */}
           <Route
