@@ -30,7 +30,7 @@ const App: React.FC = () => {
         <Routes>
           {/* Home Page (with Header and Footer) */}
           <Route
-            path="/"
+            path="/mina-art"
             element={
               <>
                 <Header />
@@ -45,15 +45,15 @@ const App: React.FC = () => {
 
           {/* Admin Panel Route (Protected, without Header and Footer) */}
           <Route
-            path="/admin"
-            element={isAuthenticated ? <AdminPanel /> : <Navigate to="/login" />}
+            path="/mina-art/admin"
+            element={isAuthenticated ? <AdminPanel /> : <Navigate to="/mina-art/login" />}
           />
 
           {/* Login Route */}
-          <Route path="/login" element={<AdminLogin />} />
+          <Route path="/mina-art/login" element={<AdminLogin />} />
 
           {/* Redirect any unknown routes to Home */}
-          <Route path="*" element={<Navigate to="/" />} />
+          <Route path="*" element={<Navigate to="/mina-art" />} />
         </Routes>
       </Router>
     </I18nextProvider>
