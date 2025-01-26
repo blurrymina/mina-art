@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { I18nextProvider } from 'react-i18next';
 import i18n from './configs/i18n';
 import { auth } from './configs/firebase'; // Import Firebase auth
@@ -10,7 +11,6 @@ import Footer from './components/Footer';
 import PaintingGame from './components/PaintingGame';
 import AdminPanel from './components/AdminPanel'; // Admin Panel component
 import AdminLogin from './components/AdminLogin';
-import { createBrowserRouter, Navigate, RouterProvider } from 'react-router-dom';
 
 const App: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
@@ -24,38 +24,38 @@ const App: React.FC = () => {
     return unsubscribe; // Clean up on unmount
   }, []);
 
-  // Define the routes using createBrowserRouter
-  const router = createBrowserRouter([
-    {
-      path: "/",
-      element: (
-        <>
-          <Header />
-          <Hero />
-          <Gallery />
-          <PaintingGame />
-          <About />
-          <Footer />
-        </>
-      ),
-    },
-    {
-      path: "/mina-art/admin",
-      element: isAuthenticated ? <AdminPanel /> : <AdminLogin />,
-    },
-    {
-      path: "/mina-art/login",
-      element: <AdminLogin />,
-    },
-    {
-      path: "*",
-      element: <Navigate to="/mina-art" />,
-    },
-  ]);
-
   return (
     <I18nextProvider i18n={i18n}>
-      <RouterProvider router={router} />
+      <Router basename="/mina-art">
+        <Routes>
+          {/* Home Page (with Header and Footer) */}
+          <Route
+            path="/"
+            element={
+              <>
+                <Header />
+                <Hero />
+                <Gallery />
+                <PaintingGame />
+                <About />
+                <Footer />
+              </>
+            }
+          />
+
+          {/* Admin Panel Route (Protected, without Header and Footer) */}
+          <Route
+            path="/admin"
+            element={isAuthenticated ? <AdminPanel /> : <Navigate to="/login" />}
+          />
+
+          {/* Login Route */}
+          <Route path="/login" element={<AdminLogin />} />
+
+          {/* Redirect any unknown routes to Home */}
+          <Route path="*" element={<Navigate to="/" />} />
+        </Routes>
+      </Router>
     </I18nextProvider>
   );
 };

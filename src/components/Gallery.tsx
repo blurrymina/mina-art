@@ -101,7 +101,7 @@ const Gallery: React.FC = () => {
 
       {/* Navigation Button to Admin Panel */}
       <button
-        onClick={() => navigate('/mina-art/admin')} 
+        onClick={() => navigate('/admin')} 
         className="px-4 py-2 bg-blue-500 text-white rounded mt-4"
       >
         Go to Admin Panel
