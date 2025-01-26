@@ -1,4 +1,5 @@
 {
+  "homepage":"http://blurrymina.github.io/MinaArt",
   "name": "mina-art",
   "private": true,
   "version": "0.0.0",
@@ -7,9 +8,11 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "predeploy":"npm run build",
+    "deploy":"gh-pages -d build"
   },
-  "dependencies": {
+  "dependencies": { 
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
     "firebase": "^11.2.0",
