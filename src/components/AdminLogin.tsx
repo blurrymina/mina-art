@@ -13,7 +13,7 @@ const AdminLogin: React.FC = () => {
     try {
       // Attempt to sign in the admin user
       await signInAdmin(email, password);
-      navigate('/mina-art/admin');  // Redirect to the admin panel
+      navigate('/admin');  // Redirect to the admin panel
     } catch (err) {
       setError('Failed to sign in. Please check your credentials.');
     }

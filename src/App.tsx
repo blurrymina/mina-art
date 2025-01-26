@@ -26,11 +26,11 @@ const App: React.FC = () => {
 
   return (
     <I18nextProvider i18n={i18n}>
-      <Router>
+      <Router basename="/mina-art">
         <Routes>
           {/* Home Page (with Header and Footer) */}
           <Route
-            path="/mina-art"
+            path="/"
             element={
               <>
                 <Header />
@@ -45,15 +45,15 @@ const App: React.FC = () => {
 
           {/* Admin Panel Route (Protected, without Header and Footer) */}
           <Route
-            path="/mina-art/admin"
-            element={isAuthenticated ? <AdminPanel /> : <Navigate to="/mina-art/login" />}
+            path="/admin"
+            element={isAuthenticated ? <AdminPanel /> : <Navigate to="/login" />}
           />
 
           {/* Login Route */}
-          <Route path="/mina-art/login" element={<AdminLogin />} />
+          <Route path="/login" element={<AdminLogin />} />
 
           {/* Redirect any unknown routes to Home */}
-          <Route path="*" element={<Navigate to="/mina-art" />} />
+          <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </Router>
     </I18nextProvider>
