@@ -24,7 +24,7 @@ const AdminPanel: React.FC = () => {
 
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (!user) {
-        navigate('/login');
+        navigate('/mina-art/login');
       }
     });
 
