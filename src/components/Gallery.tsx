@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { get, ref as dbRef } from 'firebase/database';
-import { database } from '../configs/firebase'; 
-import { useNavigate } from 'react-router-dom';  
+import { database } from '../configs/firebase';
 
 interface Image {
   id: string;
@@ -12,122 +11,126 @@ interface Image {
 
 const Gallery: React.FC = () => {
   const { t } = useTranslation();
-  const navigate = useNavigate(); 
-  const [images, setImages] = useState<Image[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 2;
+  const [images, setImages] = useState<Image[]>([]);
   const [popupImage, setPopupImage] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(true); // Loading state
 
-  // Disable scrolling when the popup is visible
+  const itemsPerPage = 1;
+  const maxPages = 4;
+
   useEffect(() => {
     if (popupImage) {
-      document.body.style.overflow = 'hidden';  // Disable scroll
+      document.body.style.overflow = 'hidden'; // Disable scrolling when popup is open
     } else {
-      document.body.style.overflow = '';  // Enable scroll
+      document.body.style.overflow = ''; // Re-enable scrolling when popup is closed
     }
   }, [popupImage]);
 
-  // Fetch images from Firebase when the component mounts
-  useEffect(() => {
-    const fetchImages = async () => {
-      const imagesRef = dbRef(database, 'images');  
-      try {
-        const snapshot = await get(imagesRef);
-        if (snapshot.exists()) {
-          const imagesData = snapshot.val();
-          const imageList = Object.keys(imagesData).map((key) => ({
-            id: key,
-            ...imagesData[key],
-          }));
-
-          // Sort images by order
-          const sortedImages = imageList.sort((a, b) => a.order - b.order);
-          setImages(sortedImages);
-        }
-      } catch (error) {
-        console.error('Error fetching images from Firebase:', error);
+  const fetchImages = async () => {
+    try {
+      const imagesRef = dbRef(database, 'images');
+      const snapshot = await get(imagesRef);
+      if (snapshot.exists()) {
+        const imagesData = snapshot.val();
+        const imageList = Object.keys(imagesData).map((key) => ({
+          id: key,
+          ...imagesData[key],
+        }));
+        
+        // Sort images by their 'order' field
+        imageList.sort((a, b) => a.order - b.order);
+        
+        setImages(imageList); // Set the sorted images
       }
-    };
+    } catch (error) {
+      console.error('Error fetching images:', error);
+    } finally {
+      setLoading(false); // Set loading to false after fetch
+    }
+  };
 
+  useEffect(() => {
     fetchImages();
   }, []);
 
-  const renderGalleryPage = () => {
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const endIndex = Math.min(startIndex + itemsPerPage, images.length);
-    return images.slice(startIndex, endIndex).map((image) => (
-      <img
-        key={image.id}
-        src={`data:image/png;base64,${image.blob}`}
-        alt={`Artwork ${image.id}`}
-        className="rounded shadow-md cursor-pointer"
-        onClick={() => setPopupImage(`data:image/png;base64,${image.blob}`)}
-      />
-    ));
+  const fetchImagesForPage = (page: number) => {
+    const startIndex = (page - 1) * itemsPerPage;
+    return images.slice(startIndex, startIndex + itemsPerPage);
   };
 
-  const handleClosePopup = () => {
-    setPopupImage(null);
+  const renderPagination = () => {
+    const totalPages = Math.ceil(images.length / itemsPerPage);
+    const paginationButtons = [];
+    let startPage = 1;
+    let endPage = totalPages;
+
+    if (totalPages > maxPages) {
+      if (currentPage <= Math.ceil(maxPages / 2)) {
+        endPage = maxPages;
+      } else if (currentPage + Math.floor(maxPages / 2) >= totalPages) {
+        startPage = totalPages - maxPages + 1;
+      } else {
+        startPage = currentPage - Math.floor(maxPages / 2);
+        endPage = currentPage + Math.floor(maxPages / 2);
+      }
+    }
+
+    if (startPage > 1) paginationButtons.push(<button key="first" onClick={() => setCurrentPage(1)}>Start</button>);
+    for (let i = startPage; i <= endPage; i++) {
+      paginationButtons.push(
+        <button key={i} className={i === currentPage ? 'active' : ''} onClick={() => setCurrentPage(i)}>
+          {i}
+        </button>
+      );
+    }
+    if (endPage < totalPages) paginationButtons.push(<button key="last" onClick={() => setCurrentPage(totalPages)}>End</button>);
+
+    return paginationButtons;
   };
 
   return (
     <section id="gallery" className="gallery">
-      <h1 data-key="gallery-title" className="section-fade">{t('gallery-title')}</h1>
-      
+      <h1 data-key="gallery-title">{t('gallery-title')}</h1>
       <button
         data-key="gallery-random"
         id="randomImageBtn"
         onClick={() => {
-          const randomIndex = Math.floor(Math.random() * images.length);
-          setPopupImage(`data:image/png;base64,${images[randomIndex].blob}`);
+          let randomPage = Math.floor(Math.random() * Math.ceil(images.length / itemsPerPage)) + 1;
+          while (randomPage === currentPage) {
+            randomPage = Math.floor(Math.random() * Math.ceil(images.length / itemsPerPage)) + 1;
+          }
+          setCurrentPage(randomPage);
         }}
       >
         {t('gallery-random')}
       </button>
 
-      <div id="gallery-container">{renderGalleryPage()}</div>
-      
-      <div id="pagination-controls" className="section-fade">
-        {Array.from({ length: Math.ceil(images.length / itemsPerPage) }).map((_, index) => (
-          <button
-            key={index}
-            onClick={() => setCurrentPage(index + 1)}
-            className={`px-4 py-2 rounded ${currentPage === index + 1 ? 'bg-pink-400 text-white' : 'bg-gray-200'}`}
-          >
-            {index + 1}
-          </button>
-        ))}
-      </div>
+      {/* Loading spinner */}
+      {loading ? (
+        <div className="loading-spinner">
+          <span>Loading images...</span>
+        </div>
+      ) : (
+        <div id="gallery-container">
+          {fetchImagesForPage(currentPage).map((image) => (
+            <img
+              key={image.id}
+              src={`data:image/png;base64,${image.blob}`}
+              alt={`Artwork ${image.id}`}
+              className="lazy-load"
+              onClick={() => setPopupImage(`data:image/png;base64,${image.blob}`)}
+            />
+          ))}
+        </div>
+      )}
 
-      {/* Navigation Button to Admin Panel */}
-      <button
-        onClick={() => navigate('/admin')} 
-        className="px-4 py-2 bg-blue-500 text-white rounded mt-4"
-      >
-        Go to Admin Panel
-      </button>
+      <div id="pagination-controls">{renderPagination()}</div>
 
-      {/* Popup Image */}
       {popupImage && (
-        <div 
-          className="popup-overlay" 
-          onClick={handleClosePopup} 
-          style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', backgroundColor: 'rgba(0,0,0,0.7)', zIndex: 9999 }}
-        >
-          <div 
-            className="popup-content" 
-            style={{ position: 'relative', maxWidth: '90%', maxHeight: '90%' }}
-            onClick={(e) => e.stopPropagation()}  // Prevent closing popup if image is clicked
-          >
-            <span 
-              className="close" 
-              onClick={handleClosePopup} 
-              style={{ position: 'absolute', top: '10px', right: '10px', fontSize: '30px', color: 'white', cursor: 'pointer' }}
-            >
-              &times;
-            </span>
-            <img src={popupImage} alt="Popup Artwork" style={{ width: '100%', height: 'auto', borderRadius: '8px' }} />
-          </div>
+        <div className="popup" onClick={() => setPopupImage(null)} style={{ display: 'flex' }}>
+          <img src={popupImage} alt="Popup Artwork" />
+          <span className="close" onClick={() => setPopupImage(null)}>&times;</span>
         </div>
       )}
     </section>

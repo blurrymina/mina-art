@@ -16,7 +16,9 @@ const AdminPanel: React.FC = () => {
   const [imageOrder, setImageOrder] = useState<number>(1);
   const [error, setError] = useState<string | null>(null);
   const [isLoadingImages, setIsLoadingImages] = useState<boolean>(false);
-  const [isUploading, setIsUploading] = useState<boolean>(false); // Tracks upload state
+  const [isUploading, setIsUploading] = useState<boolean>(false);
+  const [isLoadingDelete, setIsLoadingDelete] = useState<string | null>(null); // Track loading for delete
+  const [isLoadingReorder, setIsLoadingReorder] = useState<string | null>(null); // Track loading for reorder
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -29,7 +31,7 @@ const AdminPanel: React.FC = () => {
     });
 
     const fetchImages = async () => {
-      setIsLoadingImages(true); // Set loading to true when fetching images
+      setIsLoadingImages(true);
       const imagesRef = dbRef(database, 'images');
       try {
         const snapshot = await get(imagesRef);
@@ -42,12 +44,13 @@ const AdminPanel: React.FC = () => {
 
           const sortedImages = imageList.sort((a, b) => a.order - b.order);
           setImages(sortedImages);
+          setImageOrder(sortedImages.length + 1); // Set order to the next available spot
         }
       } catch (error) {
         setError('Failed to fetch images');
         console.error(error);
       } finally {
-        setIsLoadingImages(false); // Set loading to false when fetching is complete
+        setIsLoadingImages(false);
       }
     };
 
@@ -58,20 +61,17 @@ const AdminPanel: React.FC = () => {
   const handleImageUpload = async () => {
     if (!selectedFile) return;
 
-    // Check if the file is an image based on its MIME type
     if (!selectedFile.type.startsWith('image/')) {
       setError('Please select a valid image file.');
       return;
     }
 
-    // Trigger the loading state immediately
     setIsUploading(true);
-    setError(null);  // Clear any previous errors
+    setError(null);
 
     try {
       const reader = new FileReader();
 
-      // This runs when the file reading is complete
       reader.onloadend = async () => {
         const arrayBuffer = reader.result as ArrayBuffer;
         const binaryData = new Uint8Array(arrayBuffer);
@@ -86,59 +86,77 @@ const AdminPanel: React.FC = () => {
         const newImage: Image = {
           id: newImageRef.key!,
           order: imageOrder,
-          blob: binaryBlob,  // Store binary data as a string
+          blob: binaryBlob,
         };
 
-        // Start Firebase write operation
         await set(newImageRef, newImage);
 
-        // Update local state after upload is complete
         setImages((prevImages) => [...prevImages, newImage]);
-        setSelectedFile(null);  // Clear selected file input
-        setImageOrder((prev) => prev + 1);  // Increment order for next image
+        setSelectedFile(null);
+        setImageOrder((prev) => prev + 1);
 
-        // Complete upload state
-        setIsUploading(false);  // Hide spinner once done
+        setIsUploading(false);
       };
 
-      // Begin file reading
       reader.readAsArrayBuffer(selectedFile);
-
     } catch (err) {
       setError('Failed to upload image. Please try again.');
       console.error(err);
-
-      // Hide spinner on error
       setIsUploading(false);
     }
   };
 
   const handleDeleteImage = async (imageId: string) => {
+    setIsLoadingDelete(imageId); // Set loading state for delete
     try {
       const imageRef = dbRef(database, `images/${imageId}`);
       await remove(imageRef);
       setImages((prevImages) => prevImages.filter((image) => image.id !== imageId));
+      setIsLoadingDelete(null); // Reset loading state
     } catch (err) {
       setError('Failed to delete image.');
+      console.error(err);
+      setIsLoadingDelete(null);
     }
   };
 
-  const handleReorderImage = async (imageId: string, newOrder: number) => {
-    try {
-      const imageRef = dbRef(database, `images/${imageId}`);
-      await update(imageRef, { order: newOrder });
+  const handleReorderImage = async (imageId: string, direction: 'up' | 'down') => {
+    setIsLoadingReorder(imageId); // Set loading state for reorder
+    const index = images.findIndex((image) => image.id === imageId);
+    if (index === -1) return;
 
-      setImages((prevImages) =>
-        prevImages.map((image) =>
-          image.id === imageId ? { ...image, order: newOrder } : image
-        )
-      );
+    const newIndex = direction === 'up' ? index - 1 : index + 1;
+    if (newIndex < 0 || newIndex >= images.length) return;
+
+    const updatedImages = [...images];
+    const selectedImage = updatedImages[index];
+    const targetImage = updatedImages[newIndex];
+
+    const tempOrder = selectedImage.order;
+    selectedImage.order = targetImage.order;
+    targetImage.order = tempOrder;
+
+    updatedImages[index] = targetImage;
+    updatedImages[newIndex] = selectedImage;
+
+    try {
+      const updatedSelectedImageRef = dbRef(database, `images/${selectedImage.id}`);
+      const updatedTargetImageRef = dbRef(database, `images/${targetImage.id}`);
+
+      await update(updatedSelectedImageRef, { order: selectedImage.order });
+      await update(updatedTargetImageRef, { order: targetImage.order });
+
+      setImages(updatedImages);
+      setIsLoadingReorder(null); // Reset loading state
     } catch (err) {
       setError('Failed to reorder image.');
+      console.error(err);
+      setIsLoadingReorder(null);
     }
   };
 
   return (
+    <section id="admin-panel" className="admin-panel">
     <div>
       <h2>Admin Panel</h2>
       {error && <p>{error}</p>}
@@ -149,7 +167,7 @@ const AdminPanel: React.FC = () => {
         <input
           type="file"
           onChange={(e) => setSelectedFile(e.target.files ? e.target.files[0] : null)}
-          accept="image/*" // Restricts file dialog to image files
+          accept="image/*"
         />
         <button onClick={handleImageUpload} disabled={isUploading}>
           {isUploading ? 'Uploading...' : 'Upload Image'}
@@ -167,14 +185,30 @@ const AdminPanel: React.FC = () => {
               style={{ maxWidth: '200px', maxHeight: '200px' }}
             />
             <div className="image-actions">
-              <button onClick={() => handleDeleteImage(image.id)}>Delete</button>
-              <button onClick={() => handleReorderImage(image.id, image.order - 1)}>Move Up</button>
-              <button onClick={() => handleReorderImage(image.id, image.order + 1)}>Move Down</button>
+              <button
+                onClick={() => handleDeleteImage(image.id)}
+                disabled={isLoadingDelete === image.id} // Disable delete button while loading
+              >
+                {isLoadingDelete === image.id ? 'Deleting...' : 'Delete'}
+              </button>
+              <button
+                onClick={() => handleReorderImage(image.id, 'up')}
+                disabled={image.order === 1 || isLoadingReorder === image.id} // Disable reorder buttons while loading
+              >
+                {isLoadingReorder === image.id ? 'Reordering...' : 'Move Up'}
+              </button>
+              <button
+                onClick={() => handleReorderImage(image.id, 'down')}
+                disabled={image.order === images.length || isLoadingReorder === image.id}
+              >
+                {isLoadingReorder === image.id ? 'Reordering...' : 'Move Down'}
+              </button>
             </div>
           </div>
         ))}
       </div>
     </div>
+    </section>
   );
 };
 

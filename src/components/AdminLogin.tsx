@@ -20,6 +20,7 @@ const AdminLogin: React.FC = () => {
   };
 
   return (
+    <section id="admin-login" className="admin-login">
     <form onSubmit={handleSubmit}>
       <h2>Admin Login</h2>
       {error && <p>{error}</p>}
@@ -39,6 +40,7 @@ const AdminLogin: React.FC = () => {
       />
       <button type="submit">Login</button>
     </form>
+    </section>
   );
 };
 
