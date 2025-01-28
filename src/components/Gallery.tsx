@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { get, ref as dbRef } from 'firebase/database';
 import { database } from '../configs/firebase';
+import { useNavigate } from 'react-router-dom'; 
 
 interface Image {
   id: string;
@@ -15,6 +16,7 @@ const Gallery: React.FC = () => {
   const [images, setImages] = useState<Image[]>([]);
   const [popupImage, setPopupImage] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true); // Loading state
+    const navigate = useNavigate();
 
   const itemsPerPage = 1;
   const maxPages = 4;
@@ -76,7 +78,7 @@ const Gallery: React.FC = () => {
       }
     }
 
-    if (startPage > 1) paginationButtons.push(<button key="first" onClick={() => setCurrentPage(1)}>Start</button>);
+    if (startPage > 1) paginationButtons.push(<button key="first" onClick={() => setCurrentPage(1)}>{t('Start')}</button>);
     for (let i = startPage; i <= endPage; i++) {
       paginationButtons.push(
         <button key={i} className={i === currentPage ? 'active' : ''} onClick={() => setCurrentPage(i)}>
@@ -84,7 +86,7 @@ const Gallery: React.FC = () => {
         </button>
       );
     }
-    if (endPage < totalPages) paginationButtons.push(<button key="last" onClick={() => setCurrentPage(totalPages)}>End</button>);
+    if (endPage < totalPages) paginationButtons.push(<button key="last" onClick={() => setCurrentPage(totalPages)}>{t('End')}</button>);
 
     return paginationButtons;
   };
@@ -126,7 +128,7 @@ const Gallery: React.FC = () => {
       )}
 
       <div id="pagination-controls">{renderPagination()}</div>
-
+      <button onClick={() => navigate('/admin')}>{t('go-to-admin')}</button>
       {popupImage && (
         <div className="popup" onClick={() => setPopupImage(null)} style={{ display: 'flex' }}>
           <img src={popupImage} alt="Popup Artwork" />
