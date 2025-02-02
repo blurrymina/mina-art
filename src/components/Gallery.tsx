@@ -95,18 +95,21 @@ const Gallery: React.FC = () => {
     <section id="gallery" className="gallery">
       <h1 data-key="gallery-title">{t('gallery-title')}</h1>
       <button
-        data-key="gallery-random"
-        id="randomImageBtn"
-        onClick={() => {
-          let randomPage = Math.floor(Math.random() * Math.ceil(images.length / itemsPerPage)) + 1;
-          while (randomPage === currentPage) {
-            randomPage = Math.floor(Math.random() * Math.ceil(images.length / itemsPerPage)) + 1;
-          }
-          setCurrentPage(randomPage);
-        }}
-      >
-        {t('gallery-random')}
-      </button>
+  data-key="gallery-random"
+  id="randomImageBtn"
+  onClick={() => {
+    let randomPage = Math.floor(Math.random() * Math.ceil(images.length / itemsPerPage)) + 1;
+    while (randomPage === currentPage) {
+      randomPage = Math.floor(Math.random() * Math.ceil(images.length / itemsPerPage)) + 1;
+    }
+    setCurrentPage(randomPage);
+  }}
+  disabled={loading} // Disable the button while loading
+  className={loading ? 'disabled' : ''} // Optional: Add a class for styling
+>
+  {t('gallery-random')}
+</button>
+
 
       {/* Loading spinner */}
       {loading ? (
