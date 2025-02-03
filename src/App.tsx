@@ -1,64 +1,55 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect} from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { I18nextProvider } from 'react-i18next';
 import i18n from './configs/i18n';
-import { auth } from './configs/firebase';
 import Header from './components/Header';
 import Hero from './components/Hero';
 import Gallery from './components/Gallery';
 import About from './components/About';
 import Footer from './components/Footer';
 import PaintingGame from './components/PaintingGame';
-import AdminPanel from './components/AdminPanel';
 import AdminLogin from './components/AdminLogin';
 
 const App: React.FC = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-  const location = useLocation();  // To track route changes
-  useEffect(() => {
-    // Listen to authentication state changes
-    const unsubscribe = auth.onAuthStateChanged((user) => {
-      setIsAuthenticated(!!user); // Update state based on user authentication
-    });
+  const location = useLocation();
 
-    return unsubscribe; // Clean up on unmount
-  }, []);
 
-  useEffect(() => {
-    const isTouchDevice = window.matchMedia("(pointer: coarse)").matches;
+  // Define updateActiveLink outside of useEffect
+  const updateActiveLink = () => {
     const navLinks = document.querySelectorAll('header nav ul li a');
     const sections = document.querySelectorAll('section');
 
-    // Function to update active link based on scroll position
-    function updateActiveLink() {
-      let closestSection: HTMLElement | null = null;
-      let closestOffset = Number.POSITIVE_INFINITY;
+    let closestSection: HTMLElement | null = null;
+    let closestOffset = Number.POSITIVE_INFINITY;
 
-      sections.forEach((section) => {
-        const rect = section.getBoundingClientRect();
-        const offset = Math.abs(rect.top);
+    sections.forEach((section) => {
+      const rect = section.getBoundingClientRect();
+      const offset = Math.abs(rect.top);
 
-        if (offset < closestOffset) {
-          closestOffset = offset;
-          closestSection = section;
-        }
-      });
-
-      // Ensure last section is active when scrolled to the bottom
-      if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 10) {
-        closestSection = sections[sections.length - 1];
+      if (offset < closestOffset) {
+        closestOffset = offset;
+        closestSection = section;
       }
+    });
 
-      if (closestSection) {
-        navLinks.forEach((link) => link.classList.remove('active'));
-        const activeLink = document.querySelector(
-          `header nav ul li a[href="#${closestSection.id}"]`
-        );
-        if (activeLink) {
-          activeLink.classList.add('active');
-        }
+    // Ensure last section is active when scrolled to the bottom
+    if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 10) {
+      closestSection = sections[sections.length - 1];
+    }
+
+    if (closestSection) {
+      navLinks.forEach((link) => link.classList.remove('active'));
+      const activeLink = document.querySelector(
+        `header nav ul li a[href="#${closestSection.id}"]`
+      );
+      if (activeLink) {
+        activeLink.classList.add('active');
       }
     }
+  };
+
+  useEffect(() => {
+    const isTouchDevice = window.matchMedia("(pointer: coarse)").matches;
 
     // Smooth scroll functionality
     function handleClick(e: Event) {
@@ -92,7 +83,7 @@ const App: React.FC = () => {
         if (timeElapsed < duration) {
           requestAnimationFrame(animateScroll);
         } else {
-          updateActiveLink(); // Ensure active state updates after scrolling
+          updateActiveLink();
         }
       }
 
@@ -101,6 +92,7 @@ const App: React.FC = () => {
 
     // Apply the smooth scroll functionality only for non-touch devices
     if (!isTouchDevice) {
+      const navLinks = document.querySelectorAll('header nav ul li a');
       navLinks.forEach(anchor => anchor.addEventListener('click', handleClick));
     }
 
@@ -129,6 +121,7 @@ const App: React.FC = () => {
     window.addEventListener('resize', adjustIframeSize);
 
     return () => {
+      const navLinks = document.querySelectorAll('header nav ul li a');
       if (!isTouchDevice) {
         navLinks.forEach(anchor => anchor.removeEventListener('click', handleClick));
       }
@@ -136,14 +129,20 @@ const App: React.FC = () => {
       window.removeEventListener('load', adjustIframeSize);
       window.removeEventListener('resize', adjustIframeSize);
     };
-  }, [location]); // Re-run the effect when location changes
+  }, []); // Empty dependency array ensures this runs once after mount
+
+  useEffect(() => {
+    // Reset scroll position to the top when navigating between routes
+    window.scrollTo(0, 0);
+    updateActiveLink(); // Trigger active link update after navigation
+  }, [location]); // This will trigger on route change
 
   // Intersection Observer for fade-in animation on scroll
   useEffect(() => {
     const animatedElements = document.querySelectorAll('.section-fade');
     const observerOptions = {
       root: null,
-      rootMargin: '-50px', // Adjust to trigger fade-in earlier
+      rootMargin: '-50px',
       threshold: [0, 0.5, 1]
     };
 
@@ -193,7 +192,7 @@ const App: React.FC = () => {
 
           <Route
             path="/admin"
-            element={isAuthenticated ? <AdminPanel /> : <Navigate to="/login" />}
+            element={ <AdminLogin />}
           />
 
           <Route path="/login" element={<AdminLogin />} />
