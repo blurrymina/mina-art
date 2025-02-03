@@ -131,11 +131,11 @@ const App: React.FC = () => {
     };
   }, []); // Empty dependency array ensures this runs once after mount
 
-  useEffect(() => {
-    // Reset scroll position to the top when navigating between routes
-    window.scrollTo(0, 0);
-    updateActiveLink(); // Trigger active link update after navigation
-  }, [location]); // This will trigger on route change
+ // useEffect(() => {
+  //  // Reset scroll position to the top when navigating between routes
+   // window.scrollTo(0, 0);
+   // updateActiveLink(); // Trigger active link update after navigation
+  //}, [location]); // This will trigger on route change
 
   // Intersection Observer for fade-in animation on scroll
   useEffect(() => {
