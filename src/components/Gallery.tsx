@@ -93,7 +93,7 @@ const Gallery: React.FC = () => {
 
   return (
     <section id="gallery" className="gallery">
-      <h1 data-key="gallery-title">{t('gallery-title')}</h1>
+      <h1 data-key="gallery-title" className="section-fade">{t('gallery-title')}</h1>
       <button
   data-key="gallery-random"
   id="randomImageBtn"
@@ -105,7 +105,7 @@ const Gallery: React.FC = () => {
     setCurrentPage(randomPage);
   }}
   disabled={loading} // Disable the button while loading
-  className={loading ? 'disabled' : ''} // Optional: Add a class for styling
+  className={loading ? 'disabled' : "section-fade"} // Optional: Add a class for styling
 >
   {t('gallery-random')}
 </button>
@@ -130,8 +130,8 @@ const Gallery: React.FC = () => {
         </div>
       )}
 
-      <div id="pagination-controls">{renderPagination()}</div>
-      <button onClick={() => navigate('/admin')}>{t('go-to-admin')}</button>
+      <div id="pagination-controls" className="section-fade">{renderPagination()}</div>
+      <button className="section-fade" onClick={() => navigate('/admin')}>{t('go-to-admin')}</button>
       {popupImage && (
         <div className="popup" onClick={() => setPopupImage(null)} style={{ display: 'flex' }}>
           <img src={popupImage} alt="Popup Artwork" />
