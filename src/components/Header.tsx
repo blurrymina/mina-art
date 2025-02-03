@@ -8,14 +8,6 @@ const Header: React.FC = () => {
     i18n.changeLanguage(lang);
   };
 
-  const handleScrollToSection = (sectionId: string, e: React.MouseEvent) => {
-    e.preventDefault(); // Prevent the default anchor behavior
-    const section = document.getElementById(sectionId);
-    if (section) {
-      section.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
-
   return (
     <header>
       <div className="logo" data-key="logo">
@@ -31,15 +23,14 @@ const Header: React.FC = () => {
       </div>
       <nav>
         <ul>
-          <li><a href="#" onClick={(e) => handleScrollToSection('hero', e)} data-key="home">{t('home')}</a></li>
-          <li><a href="#" onClick={(e) => handleScrollToSection('gallery', e)} data-key="gallery">{t('gallery')}</a></li>
-          <li><a href="#" onClick={(e) => handleScrollToSection('painting-game', e)} data-key="draw">{t('draw')}</a></li>
-          <li><a href="#" onClick={(e) => handleScrollToSection('about', e)} data-key="about">{t('about')}</a></li>
+          <li><a href="#hero" data-key="home">{t('home')}</a></li>
+          <li><a href="#gallery" data-key="gallery">{t('gallery')}</a></li>
+          <li><a href="#painting-game" data-key="draw">{t('draw')}</a></li>
+          <li><a href="#about" data-key="about">{t('about')}</a></li>
         </ul>
       </nav>
     </header>
   );
 };
-
 
 export default Header;
