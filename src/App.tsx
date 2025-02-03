@@ -14,6 +14,14 @@ import AdminLogin from './components/AdminLogin';
 
 const App: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  useEffect(() => {
+    // Listen to authentication state changes
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      setIsAuthenticated(!!user); // Update state based on user authentication
+    });
+
+    return unsubscribe; // Clean up on unmount
+  }, []);
 
   useEffect(() => {
     const isTouchDevice = window.matchMedia("(pointer: coarse)").matches;
