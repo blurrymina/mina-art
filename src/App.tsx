@@ -1,5 +1,5 @@
 import React, { useEffect} from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { I18nextProvider } from 'react-i18next';
 import i18n from './configs/i18n';
 import Header from './components/Header';
@@ -11,7 +11,7 @@ import PaintingGame from './components/PaintingGame';
 import AdminLogin from './components/AdminLogin';
 
 const App: React.FC = () => {
-  const location = useLocation();
+ // const location = useLocation();
 
 
   // Define updateActiveLink outside of useEffect
