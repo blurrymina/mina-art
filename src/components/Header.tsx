@@ -8,11 +8,16 @@ const Header: React.FC = () => {
     i18n.changeLanguage(lang);
   };
 
-  const handleScrollToSection = (sectionId: string, e: React.MouseEvent) => {
-    e.preventDefault(); // Prevent the default anchor behavior
-    const section = document.getElementById(sectionId);
-    if (section) {
-      section.scrollIntoView({ behavior: 'smooth' });
+  const handleClick = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>, sectionId: string) => {
+    e.preventDefault(); // Prevent default anchor link behavior
+
+    // Scroll to the section
+    const target = document.getElementById(sectionId);
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth' });
+      
+      // Clear the URL without reloading the page
+      window.history.pushState({}, '', window.location.pathname);
     }
   };
 
@@ -31,10 +36,10 @@ const Header: React.FC = () => {
       </div>
       <nav>
         <ul>
-          <li><a href="#" onClick={(e) => handleScrollToSection('hero', e)} data-key="home">{t('home')}</a></li>
-          <li><a href="#" onClick={(e) => handleScrollToSection('gallery', e)} data-key="gallery">{t('gallery')}</a></li>
-          <li><a href="#" onClick={(e) => handleScrollToSection('painting-game', e)} data-key="draw">{t('draw')}</a></li>
-          <li><a href="#" onClick={(e) => handleScrollToSection('about', e)} data-key="about">{t('about')}</a></li>
+          <li><a href="#hero" data-key="home" onClick={(e) => handleClick(e, 'hero')}>{t('home')}</a></li>
+          <li><a href="#gallery" data-key="gallery" onClick={(e) => handleClick(e, 'gallery')}>{t('gallery')}</a></li>
+          <li><a href="#painting-game" data-key="draw" onClick={(e) => handleClick(e, 'painting-game')}>{t('draw')}</a></li>
+          <li><a href="#about" data-key="about" onClick={(e) => handleClick(e, 'about')}>{t('about')}</a></li>
         </ul>
       </nav>
     </header>
