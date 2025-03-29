@@ -293,9 +293,10 @@ footer p {
   align-items: center;
   flex-direction: column;
   animation: fadeIn 1.5s;
+  background-color: #fcd7d7;
 }
 .painting-game  h2 {
-  color: #ff9a9e;
+  color: #726868;
   font-size: 3rem;
   font-family: 'Dancing Script', cursive; 
   text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7);

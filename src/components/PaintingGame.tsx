@@ -7,7 +7,7 @@ const PaintingGame: React.FC = () => {
   return (
     <section id="painting-game" className="painting-game">
       <h2 data-key="drawing-title" className="section-fade">{t('drawing-title')}</h2>
-      <iframe src="https://jspaint.app" title="Painting Game"></iframe>
+      <iframe src="https://paint.js.org/" title="Painting Game"></iframe>
     </section>
   );
 };
