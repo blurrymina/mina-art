@@ -240,6 +240,14 @@ header nav ul li a.active {
   font-size: 2rem;
   color: #fff;
 }
+.popup .popup-arrow{
+  background: none;
+  border: none;
+  cursor: pointer;
+  user-select: none;
+  font-size: 2rem;
+  color: #fff;
+}
 .about {
   padding: 50px;
   text-align: center;

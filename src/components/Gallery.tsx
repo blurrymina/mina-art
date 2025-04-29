@@ -15,17 +15,18 @@ const Gallery: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [images, setImages] = useState<Image[]>([]);
   const [popupImage, setPopupImage] = useState<string | null>(null);
-  const [loading, setLoading] = useState<boolean>(true); // Loading state
-    const navigate = useNavigate();
+  const [popupIndex, setPopupIndex] = useState<number | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const navigate = useNavigate();
 
   const itemsPerPage = 1;
   const maxPages = 4;
 
   useEffect(() => {
     if (popupImage) {
-      document.body.style.overflow = 'hidden'; // Disable scrolling when popup is open
+      document.body.style.overflow = 'hidden';
     } else {
-      document.body.style.overflow = ''; // Re-enable scrolling when popup is closed
+      document.body.style.overflow = '';
     }
   }, [popupImage]);
 
@@ -39,16 +40,13 @@ const Gallery: React.FC = () => {
           id: key,
           ...imagesData[key],
         }));
-        
-        // Sort images by their 'order' field
         imageList.sort((a, b) => a.order - b.order);
-        
-        setImages(imageList); // Set the sorted images
+        setImages(imageList);
       }
     } catch (error) {
       console.error('Error fetching images:', error);
     } finally {
-      setLoading(false); // Set loading to false after fetch
+      setLoading(false);
     }
   };
 
@@ -91,27 +89,55 @@ const Gallery: React.FC = () => {
     return paginationButtons;
   };
 
+  const showPreviousImage = () => {
+    if (popupIndex !== null && popupIndex > 0) {
+      const newIndex = popupIndex - 1;
+      setPopupIndex(newIndex);
+      setPopupImage(`data:image/png;base64,${images[newIndex].blob}`);
+  
+      // Sync page
+      const newPage = Math.floor(newIndex / itemsPerPage) + 1;
+      if (newPage !== currentPage) {
+        setCurrentPage(newPage);
+      }
+    }
+  };
+  
+  const showNextImage = () => {
+    if (popupIndex !== null && popupIndex < images.length - 1) {
+      const newIndex = popupIndex + 1;
+      setPopupIndex(newIndex);
+      setPopupImage(`data:image/png;base64,${images[newIndex].blob}`);
+  
+      // Sync page
+      const newPage = Math.floor(newIndex / itemsPerPage) + 1;
+      if (newPage !== currentPage) {
+        setCurrentPage(newPage);
+      }
+    }
+  };
+  
+
   return (
     <section id="gallery" className="gallery">
       <h1 data-key="gallery-title" className="section-fade">{t('gallery-title')}</h1>
+
       <button
-  data-key="gallery-random"
-  id="randomImageBtn"
-  onClick={() => {
-    let randomPage = Math.floor(Math.random() * Math.ceil(images.length / itemsPerPage)) + 1;
-    while (randomPage === currentPage) {
-      randomPage = Math.floor(Math.random() * Math.ceil(images.length / itemsPerPage)) + 1;
-    }
-    setCurrentPage(randomPage);
-  }}
-  disabled={loading} // Disable the button while loading
-  className={loading ? 'disabled' : "section-fade"} // Optional: Add a class for styling
->
-  {t('gallery-random')}
-</button>
+        data-key="gallery-random"
+        id="randomImageBtn"
+        onClick={() => {
+          let randomPage = Math.floor(Math.random() * Math.ceil(images.length / itemsPerPage)) + 1;
+          while (randomPage === currentPage) {
+            randomPage = Math.floor(Math.random() * Math.ceil(images.length / itemsPerPage)) + 1;
+          }
+          setCurrentPage(randomPage);
+        }}
+        disabled={loading}
+        className={loading ? 'disabled' : "section-fade"}
+      >
+        {t('gallery-random')}
+      </button>
 
-
-      {/* Loading spinner */}
       {loading ? (
         <div className="loading-spinner">
           <span>Loading images...</span>
@@ -124,7 +150,11 @@ const Gallery: React.FC = () => {
               src={`data:image/png;base64,${image.blob}`}
               alt={`Artwork ${image.id}`}
               className="lazy-load"
-              onClick={() => setPopupImage(`data:image/png;base64,${image.blob}`)}
+              onClick={() => {
+                const index = images.findIndex((img) => img.id === image.id);
+                setPopupIndex(index);
+                setPopupImage(`data:image/png;base64,${image.blob}`);
+              }}
             />
           ))}
         </div>
@@ -132,12 +162,36 @@ const Gallery: React.FC = () => {
 
       <div id="pagination-controls" className="section-fade">{renderPagination()}</div>
       <button className="section-fade" onClick={() => navigate('/admin')}>{t('go-to-admin')}</button>
+
       {popupImage && (
-        <div className="popup" onClick={() => setPopupImage(null)} style={{ display: 'flex' }}>
-          <img src={popupImage} alt="Popup Artwork" />
-          <span className="close" onClick={() => setPopupImage(null)}>&times;</span>
+      <div
+        className="popup"
+        onClick={() => setPopupImage(null)}
+        style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}
+      >
+        <img
+          src={popupImage}
+          alt="Popup Artwork"
+          onClick={(e) => e.stopPropagation()}
+        />
+        <div className="popup-nav" onClick={(e) => e.stopPropagation()}>
+          {popupIndex! > 0 && (
+            <button className="popup-arrow left" onClick={showPreviousImage}>
+              &#8592;
+            </button>
+          )}
+          {popupIndex! < images.length - 1 && (
+            <button className="popup-arrow right" onClick={showNextImage}>
+              &#8594;
+            </button>
+          )}
         </div>
-      )}
+
+        <span className="close" onClick={() => setPopupImage(null)}>
+          &times;
+        </span>
+      </div>
+    )}
     </section>
   );
 };
