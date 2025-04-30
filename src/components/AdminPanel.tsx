@@ -188,6 +188,7 @@ const AdminPanel: React.FC = () => {
     <section id="admin-panel" className="admin-panel">
       <div>
         <h2>Admin Panel</h2>
+        <h1>You gave me your trust when I was lost, and I broke it—I carry that weight every day.</h1>
         {error && <p>{error}</p>}
         {isLoadingImages && <div className="loading-spinner">Loading images...</div>}
 

@@ -405,6 +405,14 @@ footer p {
   text-align: center;
   text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
 }
+.admin-panel h1 {
+  font-family: 'Dancing Script', cursive;
+  color: #292323;
+  font-size: 2.5rem;
+  margin-bottom: 20px;
+  text-align: center;
+  text-shadow: 2px 2px 5px rgba(70, 60, 60, 0.5);
+}
 
 /* Image Upload Section */
 .upload-container {
