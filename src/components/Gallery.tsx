@@ -176,14 +176,14 @@ const Gallery: React.FC = () => {
         />
         <div className="popup-nav" onClick={(e) => e.stopPropagation()}>
           {popupIndex! > 0 && (
-            <button className="popup-arrow left" onClick={showPreviousImage}>
+            <span className="popup-arrow left" onClick={showPreviousImage}>
               &#8592;
-            </button>
+            </span>
           )}
           {popupIndex! < images.length - 1 && (
-            <button className="popup-arrow right" onClick={showNextImage}>
+            <span className="popup-arrow right" onClick={showNextImage}>
               &#8594;
-            </button>
+            </span>
           )}
         </div>
 
