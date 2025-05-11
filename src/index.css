@@ -240,15 +240,27 @@ header nav ul li a.active {
   font-size: 2rem;
   color: #fff;
 }
-.popup .popup-arrow{
+.popup-nav {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+.popup-arrow {
   background: none;
   border: none;
-  padding: 10px;
-  cursor: pointer;
+  width: 40px; /* force equal width */
+  height: 40px;
+  display: flex;
+  align-items: center;
   -webkit-tap-highlight-color: transparent;
+  justify-content: center;
+  cursor: pointer;
   font-size: 2rem;
   color: #fff;
 }
+
 .about {
   padding: 50px;
   text-align: center;

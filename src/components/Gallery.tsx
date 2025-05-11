@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { get, ref as dbRef } from 'firebase/database';
 import { database } from '../configs/firebase';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom'; 
 
 interface Image {
@@ -177,13 +178,13 @@ const Gallery: React.FC = () => {
         <div className="popup-nav" onClick={(e) => e.stopPropagation()}>
           {popupIndex! > 0 && (
             <span className="popup-arrow left" onClick={showPreviousImage}>
-              &#8592;
-            </span>
+            <ArrowLeft />
+          </span>
           )}
           {popupIndex! < images.length - 1 && (
             <span className="popup-arrow right" onClick={showNextImage}>
-              &#8594;
-            </span>
+            <ArrowRight />
+          </span>
           )}
         </div>
 
