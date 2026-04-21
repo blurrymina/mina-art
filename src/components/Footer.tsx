@@ -6,7 +6,7 @@ const Footer: React.FC = () => {
 
   return (
     <footer>
-      <p data-key="footer-text">&copy; 2025 {t('footer-text')}</p>
+      <p data-key="footer-text">&copy; 2026 {t('footer-text')}</p>
     </footer>
   );
 };
